@@ -1,3 +1,4 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -90,7 +91,9 @@ class MagicBall extends ConsumerWidget {
             child: ref.watch(responseBallControllerProvider).when(
                   // watch for all states
                   data: (data) => data != null
-                      ? Text(data.reading)
+                      ? AnimatedText(
+                          text: data.reading,
+                        )
                       : stars(errorState: false),
                   error: (error, _) => stars(errorState: true),
                   loading: () => lightThemeMode
@@ -118,6 +121,35 @@ class MagicBall extends ConsumerWidget {
         Assets.images.smallStar.image(height: 400, width: 400),
         Assets.images.bigStars.image(height: 300, width: 300),
       ],
+    );
+  }
+}
+
+List<RotateAnimatedText> splitText(String text) {
+  final List<String> listString = text.split(' ');
+  List<RotateAnimatedText> listAnimatedText = [];
+
+  for (var i = 0; i < listString.length; i++) {
+    listAnimatedText.add(RotateAnimatedText(listString[i]));
+  }
+
+  return listAnimatedText;
+}
+
+class AnimatedText extends StatelessWidget {
+  const AnimatedText({
+    super.key,
+    required this.text,
+  });
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedTextKit(
+      animatedTexts: splitText(text),
+      isRepeatingAnimation: true,
+      repeatForever: true,
     );
   }
 }
