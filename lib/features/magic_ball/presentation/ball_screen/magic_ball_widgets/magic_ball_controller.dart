@@ -41,9 +41,9 @@ class ResponseBallController extends AutoDisposeAsyncNotifier<RandomReading?> {
     state = const AsyncLoading();
     // syntax sugar replacment try/catch bloc
     await Future.delayed(const Duration(milliseconds: 2000));
-    state = AsyncValue.data(RandomReading(reading: 'value'));
+    state = AsyncValue.data(RandomReading(reading: 'value for shows'));
     // state = await AsyncValue.guard(
-    //   () => responseBallRepository.getRepsonseFromBall(),
+    // () => responseBallRepository.getRepsonseFromBall(),
     // );
     await Future.delayed(const Duration(milliseconds: 1000)).then((value) {
       ref.read(timeoutProvider.notifier).state =
