@@ -4,6 +4,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:surf_practice_magic_ball/features/magic_ball/presentation/ball_screen/magic_ball_widgets/magic_ball_controller.dart';
 import 'package:surf_practice_magic_ball/gen/assets.gen.dart';
+import 'package:surf_practice_magic_ball/utils/adaptive_sizes.dart';
+import 'package:surf_practice_magic_ball/utils/split_string_to_words.dart';
 import 'package:surf_practice_magic_ball/utils/theme_controller.dart';
 
 const floatingAnimationDuration = Duration(milliseconds: 1000);
@@ -68,72 +70,94 @@ class MagicBall extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final lightThemeMode = ref.watch(themeModeProvider) == ThemeMode.light;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(500),
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(255, 98, 190, 221).withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 30,
-          ),
-        ],
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          lightThemeMode
-              ? Assets.images.ballLight.image(height: 400, width: 400)
-              : Assets.images.ballDark.image(height: 400, width: 400),
-          AnimatedSwitcher(
-            // switcher for fade effect when change state
-            duration: const Duration(milliseconds: 1000),
-            child: ref.watch(responseBallControllerProvider).when(
-                  // watch for all states
-                  data: (data) => data != null
-                      ? AnimatedText(
-                          text: data.reading,
-                        )
-                      : stars(errorState: false),
-                  error: (error, _) => stars(errorState: true),
-                  loading: () => lightThemeMode
-                      ? Assets.images.ballLoadingLight.image(
-                          height: 350,
-                          width: 350,
-                        )
-                      : Assets.images.ballLoadingDark.image(
-                          height: 350,
-                          width: 350,
-                        ),
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // mini helpfull boilerplate widget
-  stars({required bool errorState}) {
     return Stack(
       alignment: Alignment.center,
       children: [
-        if (errorState) Assets.images.ballError.image(height: 350, width: 350),
-        Assets.images.smallStar.image(height: 400, width: 400),
-        Assets.images.bigStars.image(height: 300, width: 300),
+        Container(
+          width: getAdaptiveSize(ImagesBall.ballWrap),
+          height: getAdaptiveSize(ImagesBall.ballWrap),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(500),
+            boxShadow: [
+              BoxShadow(
+                color: const Color.fromARGB(255, 98, 190, 221).withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 30,
+              ),
+            ],
+          ),
+          child: lightThemeMode
+              ? Assets.images.ballLight.image(fit: BoxFit.contain)
+              : Assets.images.ballDark.image(fit: BoxFit.contain),
+        ),
+        AnimatedSwitcher(
+          // switcher for fade effect when change state
+          duration: const Duration(milliseconds: 1000),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // watch for all states
+              ref.watch(responseBallControllerProvider).when(
+                    data: (data) {
+                      if (data == null) {
+                        return Stack(
+                          children: [
+                            SizedImageBall(
+                              imagesBall: ImagesBall.smallStar,
+                              assetGenImage: Assets.images.smallStar,
+                            ),
+                            SizedImageBall(
+                              imagesBall: ImagesBall.bigStar,
+                              assetGenImage: Assets.images.bigStars,
+                            ),
+                          ],
+                        );
+                      } else {
+                        return AnimatedText(
+                          text: data.reading,
+                        );
+                      }
+                    },
+                    error: (error, _) => SizedImageBall(
+                      imagesBall: ImagesBall.ballError,
+                      assetGenImage: Assets.images.ballError,
+                    ),
+                    loading: () => lightThemeMode
+                        ? SizedImageBall(
+                            imagesBall: ImagesBall.ballLoading,
+                            assetGenImage: Assets.images.ballLoadingLight,
+                          )
+                        : SizedImageBall(
+                            imagesBall: ImagesBall.ballLoading,
+                            assetGenImage: Assets.images.ballLoadingDark,
+                          ),
+                  ),
+            ],
+          ),
+        ),
       ],
     );
   }
 }
 
-List<RotateAnimatedText> splitText(String text) {
-  final List<String> listString = text.split(' ');
-  List<RotateAnimatedText> listAnimatedText = [];
+class SizedImageBall extends StatelessWidget {
+  const SizedImageBall({
+    super.key,
+    required this.imagesBall,
+    required this.assetGenImage,
+  });
 
-  for (var i = 0; i < listString.length; i++) {
-    listAnimatedText.add(RotateAnimatedText(listString[i]));
+  final ImagesBall imagesBall;
+  final AssetGenImage assetGenImage;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: getAdaptiveSize(imagesBall),
+      height: getAdaptiveSize(imagesBall),
+      child: assetGenImage.image(fit: BoxFit.contain),
+    );
   }
-
-  return listAnimatedText;
 }
 
 class AnimatedText extends StatelessWidget {
@@ -147,7 +171,7 @@ class AnimatedText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedTextKit(
-      animatedTexts: splitText(text),
+      animatedTexts: text.splitTextToAnimatedWords(),
       isRepeatingAnimation: true,
       repeatForever: true,
     );

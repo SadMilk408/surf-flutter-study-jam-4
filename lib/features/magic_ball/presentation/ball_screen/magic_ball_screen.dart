@@ -15,12 +15,12 @@ class MagicBallScreen extends ConsumerWidget {
         leading: const ChangeThemeIcon(),
         backgroundColor: Colors.transparent,
       ),
-      body: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 28.0),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 28.0),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+            children: const [
               MagicBallAnimate(),
               SizedBox(height: 50),
               Text(
