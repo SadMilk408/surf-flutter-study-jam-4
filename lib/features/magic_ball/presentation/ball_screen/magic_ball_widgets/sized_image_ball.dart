@@ -14,10 +14,12 @@ class SizedImageBall extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: getAdaptiveSize(imagesBall),
-      height: getAdaptiveSize(imagesBall),
-      child: assetGenImage.image(fit: BoxFit.contain),
-    );
+    return LayoutBuilder(builder: (context, constraints) {
+      return SizedBox(
+        width: getAdaptiveSize(imagesBall, constraints.maxWidth),
+        height: getAdaptiveSize(imagesBall, constraints.maxWidth),
+        child: assetGenImage.image(fit: BoxFit.contain),
+      );
+    });
   }
 }

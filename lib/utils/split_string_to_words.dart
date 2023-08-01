@@ -5,10 +5,10 @@ extension SplitTextTo on String {
     final List<String> listString = split(' ');
     List<FadeAnimatedText> listAnimatedText = [];
 
-    for (var i = 0; i < listString.length; i++) {
-      listAnimatedText.add(FadeAnimatedText(listString[i]));
+    for (var i = 0; i < listString.length - 1; i += 2) {
+      listAnimatedText
+          .add(FadeAnimatedText('${listString[i]} ${listString[i + 1]}'));
     }
-
     return listAnimatedText;
   }
 }
