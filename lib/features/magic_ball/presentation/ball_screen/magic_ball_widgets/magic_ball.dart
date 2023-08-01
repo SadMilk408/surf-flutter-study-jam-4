@@ -1,67 +1,16 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:surf_practice_magic_ball/features/magic_ball/presentation/ball_screen/magic_ball_widgets/animated_text.dart';
 import 'package:surf_practice_magic_ball/features/magic_ball/presentation/ball_screen/magic_ball_widgets/magic_ball_controller.dart';
+import 'package:surf_practice_magic_ball/features/magic_ball/presentation/ball_screen/magic_ball_widgets/sized_image_ball.dart';
 import 'package:surf_practice_magic_ball/gen/assets.gen.dart';
 import 'package:surf_practice_magic_ball/utils/adaptive_sizes.dart';
-import 'package:surf_practice_magic_ball/utils/split_string_to_words.dart';
 import 'package:surf_practice_magic_ball/utils/theme_controller.dart';
 
 const floatingAnimationDuration = Duration(milliseconds: 1000);
 const shakingAnimationDuration = Duration(milliseconds: 100);
 const floatingTweenEnd = Offset(0, .05);
 const shakingTweenEnd = Offset(.03, 0);
-
-/// Widget for show and controll Magic Ball functions
-class MagicBallAnimate extends HookConsumerWidget {
-  const MagicBallAnimate({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final controller = useAnimationController(
-      duration: floatingAnimationDuration,
-    )..repeat(reverse: true);
-    final tween = Tween<Offset>(
-      begin: Offset.zero,
-      end: floatingTweenEnd,
-    );
-    final animate = tween.animate(CurvedAnimation(
-      parent: controller,
-      curve: Curves.easeInOut,
-    ));
-
-    ref.listen(responseBallControllerProvider, (_, state) {
-      final model = ref.watch(responseBallControllerProvider);
-      if (model is AsyncLoading) {
-        controller.duration = shakingAnimationDuration;
-        tween.end = shakingTweenEnd;
-      } else {
-        controller.duration = floatingAnimationDuration;
-        tween.end = floatingTweenEnd;
-      }
-
-      controller.repeat(reverse: true);
-    });
-
-    return GestureDetector(
-      onTap: () {
-        // check for escape many request while loading data
-        if (ref.read(timeoutProvider.notifier).state) {
-          ref.read(responseBallControllerProvider.notifier).getBallResponse();
-        }
-      },
-      child: Column(
-        children: <Widget>[
-          SlideTransition(
-            position: animate,
-            child: const MagicBall(),
-          )
-        ],
-      ),
-    );
-  }
-}
 
 class MagicBall extends ConsumerWidget {
   const MagicBall({super.key});
@@ -113,7 +62,7 @@ class MagicBall extends ConsumerWidget {
                           ],
                         );
                       } else {
-                        return AnimatedText(
+                        return CustomAnimatedText(
                           text: data.reading,
                         );
                       }
@@ -136,44 +85,6 @@ class MagicBall extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class SizedImageBall extends StatelessWidget {
-  const SizedImageBall({
-    super.key,
-    required this.imagesBall,
-    required this.assetGenImage,
-  });
-
-  final ImagesBall imagesBall;
-  final AssetGenImage assetGenImage;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: getAdaptiveSize(imagesBall),
-      height: getAdaptiveSize(imagesBall),
-      child: assetGenImage.image(fit: BoxFit.contain),
-    );
-  }
-}
-
-class AnimatedText extends StatelessWidget {
-  const AnimatedText({
-    super.key,
-    required this.text,
-  });
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedTextKit(
-      animatedTexts: text.splitTextToAnimatedWords(),
-      isRepeatingAnimation: true,
-      repeatForever: true,
     );
   }
 }

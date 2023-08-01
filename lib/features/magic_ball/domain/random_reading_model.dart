@@ -16,4 +16,12 @@ class RandomReading {
 
   @override
   String toString() => 'RandomReading(reading: $reading)';
+
+  RandomReading copyWith({
+    String? reading,
+  }) {
+    return RandomReading(
+      reading: reading ?? this.reading,
+    );
+  }
 }

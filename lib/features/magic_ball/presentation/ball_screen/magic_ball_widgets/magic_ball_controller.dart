@@ -6,6 +6,7 @@ import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:surf_practice_magic_ball/features/magic_ball/data/fake_repository_response_ball.dart';
 import 'package:surf_practice_magic_ball/features/magic_ball/data/real_repository_response_ball.dart';
 import 'package:surf_practice_magic_ball/features/magic_ball/domain/random_reading_model.dart';
+import 'package:translator/translator.dart';
 
 // controller for get data about ball response
 class ResponseBallController extends AutoDisposeAsyncNotifier<RandomReading?> {
@@ -39,15 +40,18 @@ class ResponseBallController extends AutoDisposeAsyncNotifier<RandomReading?> {
       responseBallRepository = ref.read(realResponseBallRepositoryProvider);
     }
     state = const AsyncLoading();
-    // syntax sugar replacment try/catch bloc
-    await Future.delayed(const Duration(milliseconds: 2000));
-    state = AsyncValue.data(RandomReading(reading: 'value for shows'));
-    // state = await AsyncValue.guard(
-    // () => responseBallRepository.getRepsonseFromBall(),
-    // );
+
+    try {
+      final randomReading = await responseBallRepository.getRepsonseFromBall();
+      final translated =
+          await randomReading.reading.translate(from: 'en', to: 'ru');
+      state = AsyncValue.data(randomReading.copyWith(reading: translated.text));
+    } catch (err, stack) {
+      state = AsyncValue.error(err, stack);
+    }
     await Future.delayed(const Duration(milliseconds: 1000)).then((value) {
-      ref.read(timeoutProvider.notifier).state =
-          true; // after this, can do query
+      // after this, can do query
+      ref.read(timeoutProvider.notifier).state = true;
     });
   }
 }
