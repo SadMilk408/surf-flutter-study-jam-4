@@ -13,7 +13,7 @@ class FakeResponseBallRepository implements ResponseBallRepositoryImpl {
   @override
   Future<RandomReading> getRepsonseFromBall() async {
     // deley for checking loading state
-    await Future.delayed(const Duration(milliseconds: 2000));
+    await Future.delayed(const Duration(milliseconds: 10000));
     return Future.value(_ballResponse);
   }
 }

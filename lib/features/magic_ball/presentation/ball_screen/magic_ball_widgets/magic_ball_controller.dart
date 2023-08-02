@@ -3,9 +3,11 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:surf_practice_magic_ball/features/magic_ball/data/fake_repository_response_ball.dart';
 import 'package:surf_practice_magic_ball/features/magic_ball/data/real_repository_response_ball.dart';
 import 'package:surf_practice_magic_ball/features/magic_ball/domain/random_reading_model.dart';
+import 'package:surf_practice_magic_ball/gen/assets.gen.dart';
 import 'package:translator/translator.dart';
 
 // controller for get data about ball response
@@ -14,7 +16,7 @@ class ResponseBallController extends AutoDisposeAsyncNotifier<RandomReading?> {
       {this.fakeData = false}); // when need use fake(mock) data
 
   final bool fakeData;
-
+  final player = AudioPlayer();
   @override
   FutureOr<RandomReading?> build() {
     return null;
@@ -46,8 +48,14 @@ class ResponseBallController extends AutoDisposeAsyncNotifier<RandomReading?> {
       final translated =
           await randomReading.reading.translate(from: 'en', to: 'ru');
       state = AsyncValue.data(randomReading.copyWith(reading: translated.text));
+
+      await player.setAsset(Assets.audio.good);
+      await player.play();
     } catch (err, stack) {
       state = AsyncValue.error(err, stack);
+
+      await player.setAsset(Assets.audio.fail);
+      await player.play();
     }
     await Future.delayed(const Duration(milliseconds: 1000)).then((value) {
       // after this, can do query
